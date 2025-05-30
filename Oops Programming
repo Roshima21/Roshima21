@@ -1,0 +1,307 @@
+// 1. Book Class
+class Book {
+    // Attributes
+    private String bookID;
+    private String title;
+    private String author;
+    private boolean isAvailable;
+
+    // Constructor to initialize book attributes
+    public Book(String bookID, String title, String author, boolean isAvailable) {
+        this.bookID = bookID;
+        this.title = title;
+        this.author = author;
+        this.isAvailable = isAvailable;
+    }
+
+    // Getter and Setter methods for book attributes
+
+    public String getBookID() {
+        return bookID;
+    }
+
+    public void setBookID(String bookID) {
+        this.bookID = bookID;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public boolean isAvailable() {
+        return isAvailable;
+    }
+
+    public void setAvailable(boolean available) {
+        isAvailable = available;
+    }
+
+    @Override
+    public String toString() {
+        return "Book ID: " + bookID + ", Title: " + title + ", Author: " + author + ", Available: " + (isAvailable ? "Yes" : "No");
+    }
+}
+
+// 2. Library Class
+class Library {
+    private Book[] books; // An array to store Book objects
+    private int currentBookCount; // To keep track of the actual number of books
+
+    // Constructor to initialize the books array
+    public Library() {
+        this.books = new Book[5]; // As suggested in the image, fixed size array
+        this.currentBookCount = 0;
+        System.out.println("Library created with capacity for 5 books.");
+    }
+
+    // Method to add a book to the library
+    public void addBook(Book book) {
+        if (currentBookCount < books.length) {
+            books[currentBookCount] = book;
+            currentBookCount++;
+            System.out.println("Book '" + book.getTitle() + "' (ID: " + book.getBookID() + ") added successfully.");
+        } else {
+            System.out.println("Library is full. Cannot add more books.");
+        }
+    }
+
+    // Method to remove a book from the library using its ID
+    public void removeBook(String bookID) {
+        boolean found = false;
+        for (int i = 0; i < currentBookCount; i++) {
+            if (books[i] != null && books[i].getBookID().equals(bookID)) {
+                System.out.println("Removing Book: " + books[i].getTitle() + " (ID: " + bookID + ")");
+                // Shift elements to the left to fill the gap
+                for (int j = i; j < currentBookCount - 1; j++) {
+                    books[j] = books[j + 1];
+                }
+                books[currentBookCount - 1] = null; // Clear the last element
+                currentBookCount--;
+                found = true;
+                System.out.println("Book with ID '" + bookID + "' removed successfully.");
+                break;
+            }
+        }
+        if (!found) {
+            System.out.println("Book with ID '" + bookID + "' not found in the library.");
+        }
+    }
+
+    // Method to search a book using ID
+    public Book searchBook(String bookID) {
+        for (int i = 0; i < currentBookCount; i++) {
+            if (books[i] != null && books[i].getBookID().equals(bookID)) {
+                return books[i];
+            }
+        }
+        return null; // Book not found
+    }
+
+    // Method to replace the name and author of a given book ID
+    public void replaceBook(String bookID, String newTitle, String newAuthor) {
+        boolean found = false;
+        for (int i = 0; i < currentBookCount; i++) {
+            if (books[i] != null && books[i].getBookID().equals(bookID)) {
+                System.out.println("Updating Book: " + books[i].getTitle() + " (ID: " + bookID + ")");
+                books[i].setTitle(newTitle);
+                books[i].setAuthor(newAuthor);
+                found = true;
+                System.out.println("Book ID '" + bookID + "' updated successfully with new Title: '" + newTitle + "' and Author: '" + newAuthor + "'.");
+                break;
+            }
+        }
+        if (!found) {
+            System.out.println("Book with ID '" + bookID + "' not found for replacement.");
+        }
+    }
+
+    // Method to display all books in the library
+    public void displayBooks() {
+        if (currentBookCount == 0) {
+            System.out.println("The library is currently empty.");
+            return;
+        }
+        System.out.println("\n--- Books in the Library ---");
+        for (int i = 0; i < currentBookCount; i++) {
+            if (books[i] != null) {
+                System.out.println((i + 1) + ". " + books[i]);
+            }
+        }
+        System.out.println("----------------------------");
+    }
+}
+
+// 3. Main Class (BookManagementSystem)
+public class BookManagementSystem {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        Library myLibrary = new Library();
+
+        int choice;
+        do {
+            System.out.println("\n--- Library Management System Menu ---");
+            System.out.println("1. Add Book");
+            System.out.println("2. Remove Book");
+            System.out.println("3. Search Book");
+            System.out.println("4. Display All Books");
+            System.out.println("5. Replace Book Title/Author");
+            System.out.println("6. Exit");
+            System.out.print("Enter your choice: ");
+
+            try {
+                choice = Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number between 1 and 6.");
+                choice = 0; // Set to 0 to loop again
+                continue;
+            }
+
+
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter Book ID: ");
+                    String addId = scanner.nextLine();
+                    System.out.print("Enter Title: ");
+                    String addTitle = scanner.nextLine();
+                    System.out.print("Enter Author: ");
+                    String addAuthor = scanner.nextLine();
+                    // Assuming new books are always available upon addition
+                    myLibrary.addBook(new Book(addId, addTitle, addAuthor, true));
+                    break;
+                case 2:
+                    System.out.print("Enter Book ID to remove: ");
+                    String removeId = scanner.nextLine();
+                    myLibrary.removeBook(removeId);
+                    break;
+                case 3:
+                    System.out.print("Enter Book ID to search: ");
+                    String searchId = scanner.nextLine();
+                    Book foundBook = myLibrary.searchBook(searchId);
+                    if (foundBook != null) {
+                        System.out.println("Book Found: " + foundBook);
+                    } else {
+                        System.out.println("Book with ID '" + searchId + "' not found.");
+                    }
+                    break;
+                case 4:
+                    myLibrary.displayBooks();
+                    break;
+                case 5:
+                    System.out.print("Enter Book ID to replace: ");
+                    String replaceId = scanner.nextLine();
+                    System.out.print("Enter New Title: ");
+                    String newTitle = scanner.nextLine();
+                    System.out.print("Enter New Author: ");
+                    String newAuthor = scanner.nextLine();
+                    myLibrary.replaceBook(replaceId, newTitle, newAuthor);
+                    break;
+                case 6:
+                    System.out.println("Exiting Library Management System. Goodbye!");
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please enter a number between 1 and 6.");
+            }
+        } while (choice != 6);
+
+        scanner.close();
+    }
+}
+
+
+// 1. Create Interface Taxable
+interface Taxable {
+    // Members (constants are implicitly public static final in interfaces)
+    double SALES_TAX = 0.07; // 7%
+    double INCOME_TAX = 0.105; // 10.5%
+
+    // Abstract method (implicitly public abstract)
+    double calcTax();
+}
+
+// 2. Create class Employee and implement Taxable
+class Employee implements Taxable {
+    private String empId;
+    private String name;
+    private double salary; // Yearly salary
+
+    public Employee(String empId, String name, double salary) {
+        this.empId = empId;
+        this.name = name;
+        this.salary = salary;
+    }
+
+    // Getters (optional, but good practice)
+    public String getEmpId() {
+        return empId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public double getSalary() {
+        return salary;
+    }
+
+    @Override
+    public double calcTax() {
+        // Calculate incomeTax on yearly salary
+        return this.salary * Taxable.INCOME_TAX;
+    }
+
+    @Override
+    public String toString() {
+        return "Employee [ID: " + empId + ", Name: " + name + ", Salary: " + String.format("%.2f", salary) + "]";
+    }
+}
+
+// 3. Create class Product and implement Taxable
+class Product implements Taxable {
+    private String pid;
+    private double price; // Unit price
+    private int quantity;
+
+    public Product(String pid, double price, int quantity) {
+        this.pid = pid;
+        this.price = price;
+        this.quantity = quantity;
+    }
+
+    // Getters (optional, but good practice)
+    public String getPid() {
+        return pid;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    @Override
+    public double calcTax() {
+        // Calculate salesTax on unit price of product
+        // Assuming the tax is applied per unit, and then multiplied by quantity for total tax
+        // If the problem implies tax on *total* product price (price * quantity), adjust here.
+        return (this.price * this.quantity) * Taxable.SALES_TAX;
+    }
+
+     @Override
+    public String toString() {
+        return "Product [ID: " + pid + ", Price per unit: " + String.format("%.2f", price) + ", Quantity: " + quantity + "]";
+    }
+}
