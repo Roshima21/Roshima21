@@ -1,0 +1,105 @@
+A)
+
+SELECT ename, sal
+FROM EMPL
+WHERE sal >= 2200;
+
+B)
+
+SELECT *
+FROM EMPL
+WHERE comm IS NULL OR comm = 0.00;
+
+C)
+
+SELECT ename, sal
+FROM EMPL
+WHERE sal NOT BETWEEN 2500 AND 4000;
+-- Alternative using OR:
+-- WHERE sal < 2500 OR sal > 4000;
+
+D)
+
+SELECT ename, job, sal
+FROM EMPL
+WHERE mgr IS NULL;
+
+E)
+
+SELECT ename
+FROM EMPL
+WHERE ename LIKE '__A%';
+
+F)
+
+SELECT ename
+FROM EMPL
+WHERE ename LIKE '%T';
+
+
+2)
+
+CREATE TABLE Employee (
+    empcode INT PRIMARY KEY,
+    empname VARCHAR(50) NOT NULL,
+    empage INT,
+    esalary DECIMAL(10, 2)
+);
+
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+public class JDBCEmployeeInsert {
+    // Database connection details
+    static final String DB_URL = "jdbc:mysql://localhost:3306/guvi_db";
+    static final String USER = "your_username"; // <-- CHANGE THIS
+    static final String PASS = "your_password"; // <-- CHANGE THIS
+
+    // Data to be inserted
+    private static final Object[][] EMPLOYEE_DATA = {
+        {101, "Jenny", 25, 10000.00},
+        {102, "Jacky", 30, 20000.00},
+        {103, "Joe", 20, 40000.00},
+        {104, "John", 40, 80000.00},
+        {105, "Shameer", 25, 90000.00}
+    };
+
+    public static void main(String[] args) {
+        // SQL INSERT statement
+        String sql = "INSERT INTO Employee (empcode, empname, empage, esalary) VALUES (?, ?, ?, ?)";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // Loop through the data and execute the insert statement
+            for (Object[] data : EMPLOYEE_DATA) {
+                int empcode = (int) data[0];
+                String empname = (String) data[1];
+                int empage = (int) data[2];
+                double esalary = (double) data[3];
+
+                // Set the parameters for the prepared statement
+                pstmt.setInt(1, empcode);
+                pstmt.setString(2, empname);
+                pstmt.setInt(3, empage);
+                pstmt.setDouble(4, esalary);
+
+                // Execute the update (insert)
+                int rowsAffected = pstmt.executeUpdate();
+                System.out.println("Inserted employee " + empname + ". Rows affected: " + rowsAffected);
+            }
+
+            System.out.println("\nAll data inserted successfully!");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.err.println("Database error occurred: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("An unexpected error occurred: " + e.getMessage());
+        }
+    }
+}
