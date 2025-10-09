@@ -1,0 +1,319 @@
+1)
+public class Person {
+    // Properties (fields) of the class
+    private String name;
+    private int age;
+
+    // --- a. Default age of person should be 18; ---
+
+    /**
+     * Constructor 1: Default constructor.
+     * Initializes a Person object with a default age of 18
+     * and a placeholder name.
+     */
+    public Person() {
+        this.name = "Unknown";
+        this.age = 18; // Default age as required
+    }
+
+    // --- b. A person object can be initialized with name and age; ---
+
+    /**
+     * Constructor 2: Parameterized constructor.
+     * Initializes a Person object with specified name and age.
+     *
+     * @param name The name of the person.
+     * @param age The age of the person.
+     */
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    // --- c. Method to display name and age of person ---
+
+    /**
+     * Method to display the name and age of the person.
+     */
+    public void displayDetails() {
+        System.out.println("Person Details:");
+        System.out.println(" Name: " + name);
+        System.out.println(" Age: " + age);
+    }
+
+    // Main method for testing the Person class
+    public static void main(String[] args) {
+        // Test case 1: Using the default constructor (a)
+        System.out.println("--- Creating Person 1 (Default Age) ---");
+        Person person1 = new Person();
+        person1.displayDetails(); // (c) Should display age 18
+
+        System.out.println("\n--- Creating Person 2 (Custom Name and Age) ---");
+        // Test case 2: Using the parameterized constructor (b)
+        Person person2 = new Person("Alice", 25);
+        person2.displayDetails(); // (c) Should display age 25
+    }
+}
+
+
+2)
+public class ProductMain {
+
+    // --- c. Method to calculate and return the total amount spent ---
+    
+    /**
+     * Calculates the total amount spent on all products in the array.
+     * Amount spent on single product = price * quantity
+     * * @param products An array of Product objects.
+     * @return The total cost of all products.
+     */
+    public static double calculateTotalAmount(Product[] products) {
+        double totalAmount = 0.0;
+        
+        for (Product product : products) {
+            // Calculate amount spent on a single product
+            double singleProductCost = product.getPrice() * product.getQuantity();
+            
+            // Add to the total
+            totalAmount += singleProductCost;
+        }
+        
+        return totalAmount;
+    }
+    
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        // Create an array to store five Product objects as requested in (a)
+        Product[] productArray = new Product[5];
+
+        // --- a. Accept five product information from user and store in an array ---
+        System.out.println("--- Entering Five Product Details ---");
+        for (int i = 0; i < 5; i++) {
+            System.out.println("\n--- Product " + (i + 1) + " ---");
+            
+            System.out.print("Enter Product ID (pid): ");
+            int pid = scanner.nextInt();
+
+            System.out.print("Enter Price: ");
+            double price = scanner.nextDouble();
+
+            System.out.print("Enter Quantity: ");
+            int quantity = scanner.nextInt();
+            
+            // Create a new Product object and store it in the array
+            productArray[i] = new Product(pid, price, quantity);
+        }
+        
+        // --- b. Find Pid of the product with the highest price ---
+        System.out.println("\n--- Finding Product with Highest Price ---");
+        
+        // Initialize variables to track the highest price found so far
+        double maxPrice = -1; 
+        int pidOfMaxPrice = -1;
+        
+        for (Product product : productArray) {
+            if (product.getPrice() > maxPrice) {
+                maxPrice = product.getPrice();
+                pidOfMaxPrice = product.getPid();
+            }
+        }
+        
+        if (pidOfMaxPrice != -1) {
+             System.out.println("The Product ID (pid) with the highest price is: " + pidOfMaxPrice);
+             System.out.println("Highest Price: $" + String.format("%.2f", maxPrice));
+        } else {
+            System.out.println("No products were processed.");
+        }
+        
+        // --- c. Calculate and display the total amount spent on all products ---
+        System.out.println("\n--- Calculating Total Amount Spent ---");
+        
+        // Call the static method (c) to get the total amount
+        double totalAmount = calculateTotalAmount(productArray);
+        
+        System.out.println("Total amount spent on all products: $" + String.format("%.2f", totalAmount));
+
+        scanner.close();
+    }
+}
+
+
+3) 
+public class Account {
+    
+    // Data member (property)
+    private double balance;
+
+    // 1. Constructor: No argument (Default)
+    /**
+     * Default constructor. Initializes the account balance to 0.0.
+     */
+    public Account() {
+        this.balance = 0.0;
+        System.out.println("Account created with a default balance of $0.00");
+    }
+
+    // 2. Constructor: With argument (Parameterized)
+    /**
+     * Parameterized constructor. Initializes the account with a starting balance.
+     * @param initialBalance The starting balance for the account.
+     */
+    public Account(double initialBalance) {
+        if (initialBalance >= 0) {
+            this.balance = initialBalance;
+        } else {
+            this.balance = 0.0;
+            System.out.println("Warning: Initial balance cannot be negative. Setting balance to $0.00.");
+        }
+        System.out.println("Account created with an initial balance of $" + String.format("%.2f", this.balance));
+    }
+
+    // --- a. method to deposit the amount to the account ---
+    /**
+     * Deposits the specified amount into the account.
+     * @param amount The amount to deposit.
+     */
+    public void deposit(double amount) {
+        if (amount > 0) {
+            balance += amount;
+            System.out.println("\nSuccessfully deposited: $" + String.format("%.2f", amount));
+        } else {
+            System.out.println("\nDeposit failed: Amount must be positive.");
+        }
+        // Call display method (c) to show the new balance
+        displayBalance(); 
+    }
+
+    // --- b. method to withdraw the amount from the account ---
+    /**
+     * Withdraws the specified amount from the account, checking for sufficient funds.
+     * @param amount The amount to withdraw.
+     * @return true if withdrawal was successful, false otherwise.
+     */
+    public boolean withdraw(double amount) {
+        if (amount <= 0) {
+            System.out.println("\nWithdrawal failed: Amount must be positive.");
+            displayBalance();
+            return false;
+        }
+        
+        if (balance >= amount) {
+            balance -= amount;
+            System.out.println("\nSuccessfully withdrew: $" + String.format("%.2f", amount));
+            displayBalance();
+            return true;
+        } else {
+            System.out.println("\nWithdrawal failed: Insufficient funds. Available balance: $" + String.format("%.2f", balance));
+            return false;
+        }
+    }
+
+    // --- c. method to display the Balance ---
+    /**
+     * Displays the current balance of the account.
+     */
+    public void displayBalance() {
+        System.out.println("Current Account Balance: $" + String.format("%.2f", balance));
+    }
+
+    // Main method for testing
+    public static void main(String[] args) {
+        // Test Case 1: Using the no-argument constructor
+        System.out.println("--- Test Account 1 (Default Constructor) ---");
+        Account acc1 = new Account(); // Balance starts at 0.0
+        acc1.displayBalance();
+
+        acc1.deposit(1500.75); // Deposit $1500.75
+        
+        acc1.withdraw(500.00); // Withdraw $500.00
+        
+        acc1.withdraw(2000.00); // Attempt to overdraw - should fail
+
+        System.out.println("\n-------------------------------------------");
+        
+        // Test Case 2: Using the with-argument constructor
+        System.out.println("--- Test Account 2 (Parameterized Constructor) ---");
+        Account acc2 = new Account(10000.50); // Balance starts at 10000.50
+        acc2.displayBalance();
+
+        acc2.withdraw(5000.25); // Withdraw $5000.25
+        acc2.deposit(750.00); // Deposit $750.00
+    }
+}
+
+4)
+public class Person {
+    private String name;
+    private int age;
+
+    /**
+     * Parameterized Constructor for Person.
+     * @param name The name of the person.
+     * @param age The age of the person.
+     */
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    /**
+     * Method to display the common attributes.
+     */
+    public void displayPersonDetails() {
+        System.out.println(" Name: " + name);
+        System.out.println(" Age: " + age);
+    }
+}
+
+
+public class Employee extends Person {
+    private String employeeID;
+    private double salary;
+
+    /**
+     * Parameterized Constructor for Employee.
+     * It takes all four attributes (name, age, employeeID, salary).
+     * * @param name The name (inherited from Person).
+     * @param age The age (inherited from Person).
+     * @param employeeID The employee's unique ID.
+     * @param salary The employee's salary.
+     */
+    public Employee(String name, int age, String employeeID, double salary) {
+        // Use the super keyword to call the constructor of the base class (Person)
+        // This initializes the inherited 'name' and 'age' attributes.
+        super(name, age); 
+
+        // Initialize the new attributes specific to the Employee class
+        this.employeeID = employeeID;
+        this.salary = salary;
+        System.out.println("Employee object created successfully.");
+    }
+
+    /**
+     * Method to display all details (inherited and specific).
+     */
+    public void displayEmployeeDetails() {
+        System.out.println("--- Employee Details ---");
+        
+        // Call the display method from the base class (Person)
+        displayPersonDetails(); 
+        
+        // Display the Employee-specific attributes
+        System.out.println(" Employee ID: " + employeeID);
+        System.out.println(" Salary: $" + String.format("%.2f", salary));
+    }
+
+    // Main method to test the classes
+    public static void main(String[] args) {
+        // Create an Employee object
+        Employee emp1 = new Employee("Jane Doe", 35, "E4567", 75000.50);
+
+        // Display the complete details
+        emp1.displayEmployeeDetails();
+        
+        System.out.println("\n------------------------------");
+
+        Employee emp2 = new Employee("Alex Smith", 28, "E1001", 55000.00);
+        emp2.displayEmployeeDetails();
+    }
+}
