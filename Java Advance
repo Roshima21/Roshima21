@@ -1,0 +1,263 @@
+
+Roshima Ruffeena
+1:37 PM (0 minutes ago)
+to me
+
+1)
+// File: StudentManagementSystem.java
+public class StudentManagementSystem {
+    public static void main(String[] args) {
+        // --- Test Cases ---
+        
+        // 1. Valid Student
+        try {
+            Student s1 = new Student(101, "Alice Smith", 19, "CS");
+        } catch (AgeNotWithinRangeException | NameNotValidException e) {
+            System.out.println("Exception caught: " + e.getMessage());
+        }
+        
+        System.out.println("\n---");
+        
+        // 2. Invalid Age (Too high: 22)
+        try {
+            Student s2 = new Student(102, "Bob Johnson", 22, "IT");
+        } catch (AgeNotWithinRangeException | NameNotValidException e) {
+            System.out.println("Exception caught: " + e.getMessage());
+        }
+        
+        System.out.println("\n---");
+        
+        // 3. Invalid Name (Contains numbers: "Charlie123")
+        try {
+            Student s3 = new Student(103, "Charlie123", 17, "ECE");
+        } catch (AgeNotWithinRangeException | NameNotValidException e) {
+            System.out.println("Exception caught: " + e.getMessage());
+        }
+        
+        System.out.println("\n---");
+        
+        // 4. Invalid Name (Contains special symbols: "David@")
+        try {
+            Student s4 = new Student(104, "David@", 20, "ME");
+        } catch (AgeNotWithinRangeException | NameNotValidException e) {
+            System.out.println("Exception caught: " + e.getMessage());
+        }
+    }
+}
+
+2)
+// File: InvalidAgeForVoterException.java
+class InvalidAgeForVoterException extends RuntimeException {
+    public InvalidAgeForVoterException(String message) {
+        super(message);
+    }
+}
+
+// File: Voter.java
+class Voter {
+    private int voterId;
+    private String name;
+    private int age;
+
+    // Parameterized Constructor
+    public Voter(int voterId, String name, int age) {
+        // Check age condition
+        if (age < 18) {
+            // Throw an UNCHECKED exception
+            throw new InvalidAgeForVoterException("Invalid age for voter");
+        }
+
+        // Initialize attributes if validation passes
+        this.voterId = voterId;
+        this.name = name;
+        this.age = age;
+        System.out.println("Voter created successfully: " + name + " (Age: " + age + ")");
+    }
+}
+
+// File: VoterTest.java
+public class VoterTest {
+    public static void main(String[] args) {
+        // --- Test Cases ---
+        
+        // 1. Valid Voter
+        try {
+            Voter v1 = new Voter(501, "Eliza", 35);
+        } catch (InvalidAgeForVoterException e) {
+            System.out.println("Exception caught: " + e.getMessage());
+        }
+        
+        System.out.println("\n---");
+        
+        // 2. Invalid Voter (Age 17)
+        try {
+            Voter v2 = new Voter(502, "Frank", 17);
+        } catch (InvalidAgeForVoterException e) {
+            System.out.println("Exception caught: " + e.getMessage());
+        }
+    }
+}
+
+3)
+// File: WeekdayArray.java
+import java.util.Scanner;
+
+public class WeekdayArray {
+    public static void main(String[] args) {
+        // Array to store weekday names
+        String[] weekdays = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+        
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter the day position (0 for Sunday, 1 for Monday, ..., 6 for Saturday):");
+        
+        try {
+            // Read user input
+            int index = scanner.nextInt();
+            
+            // Access the array element. This line might throw ArrayIndexOutOfBoundsException.
+            String dayName = weekdays[index];
+            
+            // If no exception, print the day name
+            System.out.println("The day name at position " + index + " is: " + dayName);
+            
+        } catch (ArrayIndexOutOfBoundsException e) {
+            // Handle the specific exception when index is outside [0, 6]
+            System.out.println("Error: The day position must be between 0 and 6.");
+            // Optional: Print the original message for debugging
+            // System.out.println("Detailed Error: " + e.getMessage());
+            
+        } catch (java.util.InputMismatchException e) {
+            // Handle the case where the user enters non-integer input (e.g., a letter)
+            System.out.println("Error: Invalid input. Please enter a whole number for the day position.");
+            
+        } finally {
+            // Close the scanner
+            scanner.close();
+        }
+    }
+}
+
+4)
+// File: StudentGrades.java
+import java.util.HashMap;
+import java.util.Map;
+
+public class StudentGrades {
+    // HashMap to store student names (String) and grades (Integer)
+    private Map<String, Integer> gradeMap;
+
+    public StudentGrades() {
+        // Initialize the HashMap
+        this.gradeMap = new HashMap<>();
+    }
+
+    // Method to add a new student/update grade
+    public void addStudent(String name, Integer grade) {
+        gradeMap.put(name, grade);
+        System.out.println(name + "'s grade (" + grade + ") has been added/updated.");
+    }
+
+    // Method to remove a student
+    public void removeStudent(String name) {
+        if (gradeMap.remove(name) != null) {
+            System.out.println(name + " has been removed from the system.");
+        } else {
+            System.out.println("Error: Student " + name + " not found.");
+        }
+    }
+
+    // Method to display a student's grade by name
+    public void displayGrade(String name) {
+        // Use getOrDefault to provide a clean message if the student isn't found
+        Integer grade = gradeMap.get(name);
+        
+        if (grade != null) {
+            System.out.println("The grade for " + name + " is: " + grade);
+        } else {
+            System.out.println("Student " + name + " is not in the system.");
+        }
+    }
+
+    public static void main(String[] args) {
+        StudentGrades system = new StudentGrades();
+
+        // 1. Add students
+        system.addStudent("Ramesh", 85);
+        system.addStudent("Priya", 92);
+        system.addStudent("Sanjay", 78);
+        
+        System.out.println("\n--- Operations ---");
+
+        // 2. Display a student's grade
+        system.displayGrade("Priya");
+        system.displayGrade("Unknown Student"); // Test for non-existent student
+
+        // 3. Remove a student
+        system.removeStudent("Sanjay");
+
+        // 4. Display again to confirm removal
+        system.displayGrade("Sanjay");
+        
+        // 5. Update a student's grade
+        system.addStudent("Ramesh", 88); // Ramesh's grade updated
+        system.displayGrade("Ramesh");
+    }
+}
+
+5)
+// File: StackExample.java
+import java.util.Stack;
+
+public class StackExample {
+    private Stack<Integer> stack;
+
+    public StackExample() {
+        this.stack = new Stack<>();
+    }
+
+    // a. Function for pushing elements onto the stack
+    public void pushElement(Integer element) {
+        stack.push(element); // push() method adds element to the top
+        System.out.println("Pushed: " + element);
+    }
+
+    // b. Function for popping elements from the stack
+    public Integer popElement() {
+        if (stack.isEmpty()) {
+            System.out.println("Stack is empty. Cannot pop.");
+            return null; // Return null if stack is empty
+        }
+        Integer element = stack.pop(); // pop() method removes and returns the element at the top
+        System.out.println("Popped: " + element);
+        return element;
+    }
+    
+    public void displayStack() {
+        System.out.println("Current Stack: " + stack);
+    }
+
+    public static void main(String[] args) {
+        StackExample stackOps = new StackExample();
+        
+        // Push operations
+        stackOps.pushElement(10);
+        stackOps.pushElement(20);
+        stackOps.pushElement(30);
+        stackOps.displayStack();
+
+        System.out.println("\n---");
+
+        // Pop operations
+        stackOps.popElement();
+        stackOps.popElement();
+        stackOps.displayStack();
+        
+        System.out.println("\n---");
+
+        // Pop the last element
+        stackOps.popElement();
+        
+        // Attempt to pop from an empty stack
+        stackOps.popElement();
+    }
+}
