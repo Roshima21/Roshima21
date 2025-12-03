@@ -1,0 +1,222 @@
+package com.jobconnect.model;
+
+public enum Role {
+    JOB_SEEKER,
+    EMPLOYER;
+}
+
+package com.jobconnect.model;
+
+import jakarta.persistence.*;
+import java.util.Set; // Changed to Set for better practice with roles
+
+@Entity
+@Table(name = "users")
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(unique = true, nullable = false)
+    private String username; // Could be email
+
+    @Column(nullable = false)
+    private String password;
+
+    // Stores the roles chosen during registration
+    @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Enumerated(EnumType.STRING)
+    private Set<Role> roles;
+
+    // Getters and Setters (omitted for brevity)
+    // ...
+}
+
+package com.jobconnect.repository;
+
+import com.jobconnect.model.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.Optional;
+
+public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findByUsername(String username);
+    Boolean existsByUsername(String username);
+}
+
+package com.jobconnect.security.jwt;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Component;
+import java.security.Key;
+import java.util.Date;
+
+@Component
+public class JwtTokenProvider {
+
+    // IMPORTANT: Store this secret key securely, not directly in the code!
+    @Value("${app.jwt-secret}")
+    private String jwtSecret; 
+
+    @Value("${app.jwt-expiration-milliseconds}")
+    private long jwtExpirationDate;
+
+    public String generateToken(Authentication authentication){
+        String username = authentication.getName();
+        Date currentDate = new Date();
+        Date expireDate = new Date(currentDate.getTime() + jwtExpirationDate);
+
+        String token = Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(expireDate)
+                .signWith(key(), SignatureAlgorithm.HS256)
+                .compact();
+        return token;
+    }
+
+    private Key key(){
+        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
+    }
+    
+    // Also include methods for:
+    // - getUsername(token)
+    // - validateToken(token)
+}
+
+package com.jobconnect.security;
+
+import com.jobconnect.security.jwt.JwtAuthenticationFilter;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+@Configuration
+@EnableMethodSecurity
+public class SecurityConfig {
+
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
+
+    @Bean
+    public static PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
+    }
+
+    @Bean
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+        http.csrf(csrf -> csrf.disable())
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests((authorize) ->
+                authorize.requestMatchers("/api/auth/**").permitAll() // Allow public access to registration/login
+                         // Example of role-based access control
+                         .requestMatchers("/api/jobs/employer/**").hasAuthority("EMPLOYER")
+                         .requestMatchers("/api/jobs/seeker/**").hasAuthority("JOB_SEEKER")
+                         .anyRequest().authenticated() // All other requests must be authenticated
+            );
+
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+}
+
+package com.jobconnect.controller;
+
+import com.jobconnect.model.Role;
+import com.jobconnect.model.User;
+import com.jobconnect.repository.UserRepository;
+import com.jobconnect.security.jwt.JwtTokenProvider;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+import java.util.Collections;
+import java.util.Map;
+
+// DTOs (Request/Response objects) for login and register would be required here
+
+@RestController
+@RequestMapping("/api/auth")
+public class AuthController {
+
+    private final AuthenticationManager authenticationManager;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
+
+    public AuthController(AuthenticationManager authenticationManager, UserRepository userRepository,
+                          PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider) {
+        this.authenticationManager = authenticationManager;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtTokenProvider = jwtTokenProvider;
+    }
+
+    // Example of DTO-less implementation for brevity
+    @PostMapping("/signin")
+    public ResponseEntity<Map<String, String>> authenticateUser(@RequestBody Map<String, String> loginDetails){
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginDetails.get("username"), loginDetails.get("password")));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        String token = jwtTokenProvider.generateToken(authentication);
+
+        // Return the token to the frontend
+        return new ResponseEntity<>(Collections.singletonMap("token", token), HttpStatus.OK);
+    }
+
+    @PostMapping("/signup")
+    public ResponseEntity<String> registerUser(@RequestBody Map<String, String> registerDetails){
+
+        if(userRepository.existsByUsername(registerDetails.get("username"))){
+            return new ResponseEntity<>("Username is already taken!", HttpStatus.BAD_REQUEST);
+        }
+
+        User user = new User();
+        user.setUsername(registerDetails.get("username"));
+        user.setPassword(passwordEncoder.encode(registerDetails.get("password")));
+        
+        // **Role Selection Logic**
+        String roleStr = registerDetails.get("role").toUpperCase();
+        try {
+             Role role = Role.valueOf(roleStr);
+             user.setRoles(Collections.singleton(role));
+        } catch (IllegalArgumentException e) {
+             return new ResponseEntity<>("Invalid role specified.", HttpStatus.BAD_REQUEST);
+        }
+       
+        userRepository.save(user);
+
+        return new ResponseEntity<>("User registered successfully!", HttpStatus.CREATED);
+    }
+}
+
