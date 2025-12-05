@@ -1,0 +1,44 @@
+Convert List of Strings to Uppercase using map()
+
+import java.util.stream.Stream;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class Task5_Q1 {
+    public static void main(String[] args) {
+        // The given List of Strings
+        Stream<String> streamNames = Stream.of("abc", "d", "eff");
+
+        // Use map() with a method reference to convert each string to uppercase
+        List<String> upperCaseList = streamNames
+            .map(String::toUpperCase) // String::toUpperCase is a method reference for str -> str.toUpperCase()
+            .collect(Collectors.toList());
+
+        System.out.println("Original Stream elements: abc, d, eff");
+        System.out.println("Uppercase List: " + upperCaseList); // Output: [ABC, D, EFF]
+    }
+}
+
+
+Filter Non-Empty Strings
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class Task5_Q2 {
+    public static void main(String[] args) {
+        // The given List of Strings
+        List<String> listStrings = Arrays.asList("abc", "", "bc", "efg", "abcd", "", "jkl");
+
+        // Filter out the empty strings using the filter() method
+        List<String> non_emptyStrings = listStrings.stream()
+            .filter(s -> !s.isEmpty()) // The predicate returns true for non-empty strings
+            .collect(Collectors.toList());
+
+        System.out.println("Original List: " + listStrings);
+        System.out.println("Non-empty Strings: " + non_emptyStrings); // Output: [abc, bc, efg, abcd, jkl]
+    }
+}
+
+
