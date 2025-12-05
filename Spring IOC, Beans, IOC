@@ -1,0 +1,122 @@
+// Product.java (JPA Entity)
+@Entity
+public class Product {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+    private Double price;
+    private String category;
+
+    // Standard getters, setters, and constructors...
+}
+
+
+// ProductRepository.java
+public interface ProductRepository extends JpaRepository<Product, Long> {
+
+    /**
+     * Custom repository method to fetch products by category.
+     * Spring Data JPA automatically implements this based on the method name.
+     */
+    List<Product> findByCategory(String category);
+}
+
+
+// ProductService.java
+@Service
+public class ProductService {
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    public Product saveProduct(Product product) {
+        return productRepository.save(product);
+    }
+
+    public List<Product> getAllProducts() {
+        return productRepository.findAll();
+    }
+
+    // Implementation for the custom method
+    public List<Product> getProductsByCategory(String category) {
+        return productRepository.findByCategory(category);
+    }
+}
+
+
+// ProductController.java (Excerpt for endpoints)
+
+@GetMapping("/")
+public String index() {
+    return "index"; // Maps to index.html
+}
+
+
+@GetMapping("/addProduct")
+public String showAddProductForm(Model model) {
+    model.addAttribute("product", new Product());
+    return "productInfo"; // Maps to productInfo.html
+}
+
+@PostMapping("/addProduct")
+public String addProduct(@ModelAttribute Product product) {
+    productService.saveProduct(product);
+    // Redirect to the display page or back to the index
+    return "redirect:/";
+}
+
+
+@GetMapping("/displayProduct")
+public String displayProducts(Model model) {
+    List<Product> products = productService.getAllProducts();
+    model.addAttribute("products", products);
+    return "displayProduct"; // Maps to displayProduct.html
+}
+
+// You could also add an endpoint to display by category
+@GetMapping("/displayProduct/{category}")
+public String displayProductsByCategory(@PathVariable String category, Model model) {
+    List<Product> products = productService.getProductsByCategory(category);
+    model.addAttribute("products", products);
+    model.addAttribute("category", category);
+    return "displayProduct"; 
+}
+
+
+<h2>Product Catalog System</h2>
+<ul>
+    <li><a href="/addProduct">1. Add Product</a></li>
+    <li><a href="/displayProduct">2. Display Product</a></li>
+</ul>
+
+
+<h2>Add New Product</h2>
+<form th:action="@{/addProduct}" th:object="${product}" method="post">
+    Product Name: <input type="text" th:field="*{name}" /><br/>
+    Price: <input type="number" th:field="*{price}" /><br/>
+    Category: <input type="text" th:field="*{category}" /><br/>
+    <button type="submit">Add</button>
+</form>
+
+
+<h2>Product Catalog</h2>
+<table border="1">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Category</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="product : ${products}">
+            <td th:text="${product.name}"></td>
+            <td th:text="${product.price}"></td>
+            <td th:text="${product.category}"></td>
+        </tr>
+    </tbody>
+</table>
+<a href="/">Back to Home</a>
