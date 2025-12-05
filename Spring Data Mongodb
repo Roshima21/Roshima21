@@ -1,0 +1,158 @@
+<dependencies>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-mongodb</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-thymeleaf</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <optional>true</optional>
+    </dependency>
+</dependencies>
+
+
+package com.example.model;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import lombok.Data; // Using Lombok for getters/setters
+
+@Data
+@Document(collection = "employees")
+public class Employee {
+
+    @Id
+    private String employeeId; // Maps to Employee ID requirement
+    private String employeeName;
+    private String employeeEmail;
+    private String location;
+
+    // Standard constructor, getters, and setters (handled by @Data if using Lombok)
+}
+
+
+package com.example.repository;
+
+import com.example.model.Employee;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import java.util.Optional;
+
+// MongoRepository provides all basic CRUD methods
+public interface EmployeeRepository extends MongoRepository<Employee, String> {
+
+    // Custom method to find by employeeId (since we're using it as the display ID)
+    Optional<Employee> findByEmployeeId(String employeeId);
+}
+
+
+package com.example.controller;
+
+import com.example.model.Employee;
+import com.example.repository.EmployeeRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
+
+@Controller // Use @Controller for serving views/forms (Requirement 1)
+public class EmployeeController {
+
+    @Autowired
+    private EmployeeRepository repository;
+
+    // --- Requirement 1: Display Form and Handle Submission ---
+
+    // 1a. Show the Form on the landing page (index.page)
+    @GetMapping("/")
+    public String showEmployeeForm(Model model) {
+        model.addAttribute("employee", new Employee());
+        return "index"; // Assuming you have an 'index.html' (Thymeleaf) page
+    }
+
+    // 1b. Handle form submission (data should be saved)
+    @PostMapping("/employees")
+    public String saveEmployee(@ModelAttribute Employee employee) {
+        // Save the Employee object to the MongoDB database
+        repository.save(employee);
+        // Redirect to a list or success page
+        return "redirect:/displayAll"; 
+    }
+
+    // --- Requirement 2 & 4: Display All Employees (RESTful URL) ---
+
+    @GetMapping("/displayAll")
+    @ResponseBody // Tells Spring to return the data directly (JSON/XML) for REST
+    public List<Employee> getAllEmployees() {
+        return repository.findAll();
+    }
+    
+    // An alternative for a simpler view of all employees if needed for Requirement 1 flow:
+    // @GetMapping("/displayAll")
+    // public String showAllEmployees(Model model) {
+    // model.addAttribute("employees", repository.findAll());
+    // return "employeeList"; // Returns a view template
+    // }
+
+
+    // --- Requirement 3 & 4: Display Single Employee by ID (RESTful URL) ---
+
+    @GetMapping("/display/{userId}")
+    @ResponseBody // Tells Spring to return the data directly (JSON/XML) for REST
+    public Employee getEmployeeById(@PathVariable("userId") String employeeId) {
+        Optional<Employee> employee = repository.findByEmployeeId(employeeId);
+        
+        // Handle case where employee is not found (optional, but good practice)
+        return employee.orElseThrow(() -> new RuntimeException("Employee not found with ID: " + employeeId));
+    }
+}
+
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Employee Registration</title>
+</head>
+<body>
+    <h2>Enter Employee Details</h2>
+    <form th:action="@{/employees}" th:object="${employee}" method="post">
+        <label>Employee ID:</label>
+        <input type="text" th:field="*{employeeId}" /><br/>
+        
+        <label>Employee Name:</label>
+        <input type="text" th:field="*{employeeName}" /><br/>
+        
+        <label>Employee Email:</label>
+        <input type="email" th:field="*{employeeEmail}" /><br/>
+
+        <label>Location:</label>
+        <input type="text" th:field="*{location}" /><br/>
+        
+        <button type="submit">Save Employee</button>
+    </form>
+    
+    <hr/>
+    <p>
+        <a th:href="@{/displayAll}">View All Employees (REST)</a>
+    </p>
+</body>
+</html>
+
+
+Functionality HTTP Method URL Path Maps to Controller Method Description
+Save Employee POST /employees saveEmployee REST: Creating a new resource.
+Display All GET /displayAll getAllEmployees REST: Retrieving a list of resources.
+Display by ID GET /display/{userId}
