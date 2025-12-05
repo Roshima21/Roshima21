@@ -1,0 +1,190 @@
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        //Read input from user using Scanner class object
+        Scanner obj = new Scanner(System.in);
+
+        // Add Logic Here
+        System.out.println("Numbers from 10 to 50:");
+        for (int i = 10; i <= 50; i++) {
+            System.out.println(i);
+        }
+
+        // The same logic using a while loop:
+        /*
+        System.out.println("\nNumbers from 10 to 50 (using while loop):");
+        int j = 10;
+        while (j <= 50) {
+            System.out.println(j);
+            j++;
+        }
+        */
+
+        obj.close();
+    }
+}
+
+
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        //Read input from user using Scanner class object
+        Scanner obj = new Scanner(System.in);
+
+        // Add Logic Here
+        System.out.print("Enter a number: ");
+        int number = obj.nextInt();
+
+        if (number > 0) {
+            System.out.println("Output: Positive");
+        } else if (number < 0) {
+            System.out.println("Output: Negative");
+        } else {
+            System.out.println("Output: Zero (neither positive nor negative)");
+        }
+        
+        obj.close();
+    }
+}
+
+
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        //Read input from user using Scanner class object
+        Scanner obj = new Scanner(System.in);
+
+        // Add Logic Here
+        System.out.print("Enter a number to reverse (e.g., 876): ");
+        int originalNumber = obj.nextInt();
+        int number = originalNumber; // Use a copy for manipulation
+        int reversedNumber = 0;
+
+        while (number != 0) {
+            int digit = number % 10; // Get the last digit
+            reversedNumber = reversedNumber * 10 + digit; // Append the digit to the reversed number
+            number /= 10; // Remove the last digit
+        }
+
+        System.out.println("Input: " + originalNumber);
+        System.out.println("Reversed number: " + reversedNumber);
+
+        obj.close();
+    }
+}
+
+
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        //Read input from user using Scanner class object
+        Scanner obj = new Scanner(System.in);
+
+        // Add Logic Here
+        System.out.print("Enter the first number (num1): ");
+        int num1 = obj.nextInt();
+        System.out.print("Enter the second number (num2): ");
+        int num2 = obj.nextInt();
+        System.out.print("Enter the third number (num3): ");
+        int num3 = obj.nextInt();
+
+        int smallest;
+
+        if (num1 <= num2 && num1 <= num3) {
+            smallest = num1;
+        } else if (num2 <= num1 && num2 <= num3) {
+            smallest = num2;
+        } else {
+            smallest = num3;
+        }
+
+        System.out.println("The smallest number among " + num1 + ", " + num2 + ", and " + num3 + " is: " + smallest);
+        
+        obj.close();
+    }
+}
+
+
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        //Read input from user using Scanner class object
+        Scanner obj = new Scanner(System.in);
+
+        // Add Logic Here
+        System.out.print("Enter the purchase amount: ");
+        double purchaseAmount = obj.nextDouble();
+        double discountRate;
+        double finalPayableAmount;
+
+        if (purchaseAmount < 500) {
+            // 1. If the purchase amount is less than 500, no discount is applied.
+            discountRate = 0.0; // 0%
+        } else if (purchaseAmount >= 500 && purchaseAmount <= 1000) {
+            // 2. If the purchase amount is between 500 and 1000, a 10% discount is applied.
+            discountRate = 0.10; // 10%
+        } else { // purchaseAmount > 1000
+            // 3. If the purchase amount is greater than 1000 a 20% discount is applied.
+            discountRate = 0.20; // 20%
+        }
+
+        double discountAmount = purchaseAmount * discountRate;
+        finalPayableAmount = purchaseAmount - discountAmount;
+
+        System.out.println("\n--- Purchase Summary ---");
+        System.out.println("Purchase Amount: $" + String.format("%.2f", purchaseAmount));
+        System.out.println("Discount Rate: " + (int)(discountRate * 100) + "%");
+        System.out.println("Discount Amount: $" + String.format("%.2f", discountAmount));
+        System.out.println("Final Payable Amount: $" + String.format("%.2f", finalPayableAmount));
+
+        obj.close();
+    }
+}
+
+
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        //Read input from user using Scanner class object
+        Scanner obj = new Scanner(System.in);
+
+        // Add Logic Here
+        int rows = 5;
+        System.out.println("The pattern is:");
+
+        // Outer loop for rows (i)
+        for (int i = 1; i <= rows; i++) {
+            // Inner loop for columns/numbers (j)
+            for (int j = 1; j <= rows; j++) {
+                
+                // The pattern logic:
+                // The number to print is 'rows - j + 1'.
+                // Printing stops when j > (rows - i + 1), which is equivalent to j + i > rows + 1
+                
+                if (j <= rows - i + 1) {
+                    System.out.print(rows - j + 1);
+                }
+            }
+            System.out.println(); // Newline after each row
+        }
+
+        obj.close();
+    }
+}
+
+/*
+Output of the logic for verification:
+55555
+54444
+54333
+54322
+54321
+*/
+
+
